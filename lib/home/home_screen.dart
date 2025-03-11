@@ -46,8 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
           // DraggableScrollableSheet for Actions section
           DraggableScrollableSheet(
-            initialChildSize: 0.4,
-            minChildSize: 0.1,
+            initialChildSize: 0.45,
+            minChildSize: 0.42,
             maxChildSize: 0.9,
             builder: (BuildContext context, ScrollController scrollController) {
               return Container(
@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     // Handle indicator
                     Center(
                       child: Container(
-                        margin: const EdgeInsets.only(top: 10, bottom: 10),
+                        margin: const EdgeInsets.only(bottom: 1),
                         width: 40,
                         height: 5,
                         decoration: BoxDecoration(

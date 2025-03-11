@@ -19,9 +19,7 @@ class AddCash extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isClickable 
-            ? () => balanceController.addBalance(amount)
-            : null,
+        onTap: isClickable ? () => balanceController.addBalance(amount) : null,
         borderRadius: BorderRadius.circular(8),
         child: Container(
           padding: EdgeInsets.all(15),
@@ -35,7 +33,7 @@ class AddCash extends StatelessWidget {
           ),
           child: Icon(
             Icons.add,
-            color: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.primaryContainer,
             size: 24,
           ),
         ),
