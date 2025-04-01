@@ -9,8 +9,9 @@ class TransactionItem extends StatelessWidget {
   final double amount;
   final IconData icon;
   final bool isClickable;
+  final BalanceController balanceController = Get.find<BalanceController>();
 
-  const TransactionItem({
+  TransactionItem({
     super.key,
     required this.title,
     required this.subtitle,
@@ -22,7 +23,6 @@ class TransactionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final BalanceController balanceController = Get.find<BalanceController>();
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
@@ -65,11 +65,11 @@ class TransactionItem extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: isClickable
-                    ? () => balanceController.reduceBalance(amount.abs())
+                    ? () => balanceController.reduceBalance()
                     : null,
                 child: Padding(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

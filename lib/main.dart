@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:ruta_app/controllers/balance_controller.dart';
 import 'package:ruta_app/home/home_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Get.put(BalanceController());
   runApp(const MyApp());
 }
 

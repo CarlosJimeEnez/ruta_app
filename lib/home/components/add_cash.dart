@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/balance_controller.dart';
+import '../../transfer_screen/transfer_screen.dart';
 
 class AddCash extends StatelessWidget {
   final bool isClickable;
@@ -19,7 +20,12 @@ class AddCash extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isClickable ? () => balanceController.addBalance(amount) : null,
+        onTap: isClickable
+            ? () {
+                //balanceController.addBalance(amount);
+                Get.to(() => const TransferWidget());
+              }
+            : null,
         borderRadius: BorderRadius.circular(8),
         child: Container(
           padding: EdgeInsets.all(15),

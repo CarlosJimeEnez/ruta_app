@@ -7,24 +7,15 @@ class BottomActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: Colors.grey.shade800,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildActionButton(Icons.home, 'Home'),
-              _buildActionButton(Icons.map, 'Maps'),
-              _buildActionButton(Icons.settings, 'Settings'),
-            ],
-          ),
-        ),
+    return Container(
+      color: Colors.grey.shade800,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildActionButton(Icons.home, 'Home'),
+          _buildActionButton(Icons.map, 'Maps'),
+          _buildActionButton(Icons.settings, 'Settings'),
+        ],
       ),
     );
   }
@@ -35,11 +26,7 @@ class BottomActionButtons extends StatelessWidget {
       children: [
         Container(
           width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade800,
-            borderRadius: BorderRadius.circular(8),
-          ),
+          height: 60,
           child: Icon(
             icon,
             color: Colors.white,
