@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:maplibre/maplibre.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'dart:async';
+
 
 class MapaView extends StatefulWidget {
   const MapaView({super.key});
@@ -10,12 +12,13 @@ class MapaView extends StatefulWidget {
 }
 
 class _MapaViewState extends State<MapaView> {
-  MapController? _mapController;
   bool _gesturesEnabled = true;
   bool _isLoading = true;
   double? _userLatitude;
   double? _userLongitude;
-  
+  final List<Point> _userLocationPoints = [];
+  StreamSubscription<geo.Position>? _positionStreamSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +29,7 @@ class _MapaViewState extends State<MapaView> {
   // Método para obtener la posición actual del usuario
   Future<void> _determinePosition() async {
     if (!mounted) return; // Verificar si el widget sigue montado
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -39,7 +42,8 @@ class _MapaViewState extends State<MapaView> {
         permission = await geo.Geolocator.requestPermission();
         if (permission == geo.LocationPermission.denied) {
           // Permisos denegados
-          if (!mounted) return; // Verificar nuevamente si el widget sigue montado
+          if (!mounted)
+            return; // Verificar nuevamente si el widget sigue montado
           setState(() {
             _isLoading = false;
           });
@@ -68,36 +72,35 @@ class _MapaViewState extends State<MapaView> {
       }
 
       // Obtener la posición actual
-      geo.Position position = await geo.Geolocator.getCurrentPosition(
+      final geo.Position currentPosition = await geo.Geolocator.getCurrentPosition(
           desiredAccuracy: geo.LocationAccuracy.high);
 
       if (!mounted) return;
-      
-      // Guardar la posición actual
-      final double newLatitude = position.latitude;
-      final double newLongitude = position.longitude;
-      
+
+      // Actualizar la ubicación con la posición actual
       setState(() {
-        _userLatitude = newLatitude;
-        _userLongitude = newLongitude;
+        _userLatitude = currentPosition.latitude;
+        _userLongitude = currentPosition.longitude;
         _isLoading = false;
       });
 
-      // Importante: Actualizar el mapa si ya está creado
-      if (_mapController != null) {
-        // Forzar la reconstrucción completa del mapa para asegurar que se centre en la nueva posición
-        setState(() {});
-        
-        // Pequeño retraso para asegurar que el mapa se haya reconstruido antes de intentar centrarlo
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (!mounted) return;
-          
-          // Forzar otra actualización de estado para asegurar que el mapa se centre correctamente
-          setState(() {});
-          
-          debugPrint('Centrando mapa en: $_userLongitude, $_userLatitude');
+      // Actualizar el punto en el mapa
+      _updateUserLocationPoints();
+
+      // Usar el stream de posición para actualizar en tiempo real la ubicación
+      _positionStreamSubscription = geo.Geolocator.getPositionStream().listen((geo.Position position) {
+        if (!mounted) return;
+
+        debugPrint('Nueva posición recibida: ${position.latitude}, ${position.longitude}');
+        setState(() {
+          _userLatitude = position.latitude;
+          _userLongitude = position.longitude;
+          _isLoading = false;
         });
-      }
+
+        // Actualizar los puntos para el CircleLayer
+        _updateUserLocationPoints();
+      });
     } catch (e) {
       debugPrint('Error al obtener la ubicación: $e');
       if (!mounted) return;
@@ -107,26 +110,27 @@ class _MapaViewState extends State<MapaView> {
     }
   }
 
-  // Método para ir a la ubicación actual
-  void _goToCurrentLocation() {
-    // Primero actualizar la ubicación
-    _determinePosition().then((_) {
-      // Luego recrear el mapa con la nueva posición
-      if (_userLatitude != null && _userLongitude != null && mounted) {
-        // Forzar una reconstrucción completa del mapa
-        setState(() {
-          // Esto forzará la reconstrucción del mapa con la nueva posición
-        });
+  // Controlador del mapa
+  MapController? _mapController;
 
-        // Mostrar un mensaje de confirmación
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Ubicación actualizada'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    });
+  // Método para ir a la ubicación actual
+  Future<void> _goToCurrentLocation() async {
+    if (_userLatitude == null || _userLongitude == null || _mapController == null) {
+      debugPrint('No se puede ir a la ubicación: ubicación no disponible o mapa no inicializado.');
+      return;
+    }
+
+    try {
+      // Usar el controlador para animar el mapa a la ubicación actual sin reconstruir el widget
+      await _mapController!.animateCamera(
+        center: Position(_userLongitude!, _userLatitude!),
+        zoom: 17,
+        nativeDuration: const Duration(milliseconds: 500),
+      );
+      debugPrint('Mapa centrado en la ubicación actual.');
+    } catch (e) {
+      debugPrint('Error moviendo el mapa a la ubicación actual: $e');
+    }
   }
 
   @override
@@ -135,12 +139,13 @@ class _MapaViewState extends State<MapaView> {
     final Position initialPosition = Position(9.17, 47.68);
 
     // Si tenemos la ubicación del usuario, usarla como posición inicial
-    final Position mapPosition = (_userLatitude != null && _userLongitude != null)
-        ? Position(_userLongitude!, _userLatitude!)
-        : initialPosition;
+    final Position mapPosition =
+        (_userLatitude != null && _userLongitude != null)
+            ? Position(_userLongitude!, _userLatitude!)
+            : initialPosition;
 
-    // Usar ValueKey para forzar la reconstrucción cuando cambian las coordenadas
-    final mapKey = ValueKey('map-${_userLatitude}-${_userLongitude}');
+    // Usar una clave estática para el mapa para evitar reconstrucciones innecesarias
+    const mapKey = ValueKey('map-static-key');
 
     return Scaffold(
       body: Stack(
@@ -156,20 +161,43 @@ class _MapaViewState extends State<MapaView> {
                     _gesturesEnabled ? MapGestures.all() : MapGestures.none(),
                 initStyle: 'https://tiles.openfreemap.org/styles/liberty',
               ),
+              layers: [
+                // Agregar el CircleLayer para mostrar la ubicación del usuario
+                if (_userLocationPoints.isNotEmpty)
+                  CircleLayer(
+                    points: _userLocationPoints,
+                    color: const Color(0xFF03788D).withOpacity(0.5), // Color azul semitransparente
+                    radius: 12, // Tamaño del círculo
+                    strokeColor: Colors.white, // Borde blanco para mejorar visibilidad
+                    strokeWidth: 2, // Grosor del borde
+                  ),
+              ],
               onEvent: (event) {
                 if (event case MapEventClick()) {
                   // update the map widget using Flutters' state management
                   setState(() {
                     _gesturesEnabled = !_gesturesEnabled;
                   });
+                } else if (event case MapEventIdle()) {
+                  // Cuando el mapa termina de moverse y queda inactivo
+                  debugPrint('Mapa detenido en una nueva posición');
                 }
               },
               onMapCreated: (controller) {
                 _mapController = controller;
-                debugPrint('Mapa creado con posición: ${mapPosition.lng}, ${mapPosition.lat}');
+                debugPrint(
+                    'Mapa creado con posición: ${mapPosition.lng}, ${mapPosition.lat}');
+                // Intentar actualizar los puntos de ubicación si ya tenemos las coordenadas
+                if (_userLatitude != null && _userLongitude != null) {
+                  _updateUserLocationPoints();
+                }
               },
               onStyleLoaded: (style) {
                 debugPrint('Map loaded');
+                // Intentar actualizar los puntos de ubicación si ya tenemos las coordenadas
+                if (_userLatitude != null && _userLongitude != null) {
+                  _updateUserLocationPoints();
+                }
               },
             ),
           ),
@@ -180,36 +208,7 @@ class _MapaViewState extends State<MapaView> {
               child: CircularProgressIndicator(),
             ),
 
-          // Marcador de posición personalizado (en lugar de usar capas de MapLibre)
-          if (_userLatitude != null && _userLongitude != null)
-            Positioned(
-              // Calculamos la posición en el centro de la pantalla ya que el mapa ya está centrado en la ubicación del usuario
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(225, 3, 120, 136),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          // El marcador se maneja ahora directamente en el mapa a través del CircleLayer
 
           // Botón para centrar en la ubicación actual (mejorado)
           Positioned(
@@ -242,11 +241,46 @@ class _MapaViewState extends State<MapaView> {
       ),
     );
   }
-  
+
+  // Método para actualizar el marcador de ubicación del usuario en el mapa
+  void _updateUserLocationPoints() {
+    if (_userLatitude == null || _userLongitude == null) {
+      debugPrint('No se puede actualizar la ubicación: faltan datos.');
+      return;
+    }
+
+    try {
+      // Actualizar la lista de puntos para el CircleLayer sin forzar una reconstrucción completa
+      // Solo actualizamos el estado si realmente hay un cambio en los puntos
+      final newPoint = Point(
+        coordinates: Position(_userLongitude!, _userLatitude!),
+      );
+      
+      // Verificar si necesitamos actualizar los puntos
+      bool needsUpdate = _userLocationPoints.isEmpty;
+      if (!needsUpdate && _userLocationPoints.isNotEmpty) {
+        final currentPoint = _userLocationPoints.first;
+        needsUpdate = currentPoint.coordinates.lat != _userLatitude! || 
+                     currentPoint.coordinates.lng != _userLongitude!;
+      }
+      
+      if (needsUpdate) {
+        setState(() {
+          _userLocationPoints.clear();
+          _userLocationPoints.add(newPoint);
+        });
+        debugPrint('Punto de ubicación actualizado en: $_userLatitude, $_userLongitude');
+      }
+    } catch (e) {
+      debugPrint('Error actualizando el punto de ubicación: $e');
+    }
+  }
+
   @override
   void dispose() {
+    // Cancelar la suscripción al stream de posición
+    _positionStreamSubscription?.cancel();
     // Limpiar recursos cuando el widget se destruye
-    _mapController = null;
     super.dispose();
   }
 }
