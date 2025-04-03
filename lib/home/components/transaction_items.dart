@@ -24,7 +24,7 @@ class TransactionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final BalanceController balanceController = Get.find<BalanceController>();
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: Colors.grey.shade800),
@@ -33,7 +33,7 @@ class TransactionItem extends StatelessWidget {
         children: [
           // Left section with icon
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               border: Border(
                 right: BorderSide(color: Colors.grey.shade800),
@@ -46,14 +46,14 @@ class TransactionItem extends StatelessWidget {
                   '1',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(width: 5),
+                const SizedBox(width: 3),
                 Icon(
                   icon,
                   color: Colors.white,
-                  size: 20,
+                  size: 18,
                 ),
               ],
             ),
@@ -69,7 +69,7 @@ class TransactionItem extends StatelessWidget {
                     : null,
                 child: Padding(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -82,7 +82,7 @@ class TransactionItem extends StatelessWidget {
                             title,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -90,7 +90,7 @@ class TransactionItem extends StatelessWidget {
                             subtitle,
                             style: TextStyle(
                               color: Colors.grey.shade400,
-                              fontSize: 14,
+                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -101,7 +101,7 @@ class TransactionItem extends StatelessWidget {
                         '${amount >= 0 ? '+' : ''}${amount.toStringAsFixed(1)}\$',
                         style: TextStyle(
                           color: amount >= 0 ? Colors.green : Colors.red,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

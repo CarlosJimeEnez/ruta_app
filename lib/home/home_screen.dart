@@ -3,8 +3,9 @@ import 'package:get/get.dart';
 import 'package:ruta_app/edit_cash_screen/edit_screen.dart';
 import 'package:ruta_app/home/components/add_cash.dart';
 import 'package:ruta_app/home/components/app_bar.dart';
+import 'package:ruta_app/home/components/mapa.dart';
 import 'package:ruta_app/home/components/transaction_items.dart';
-
+import 'package:maplibre/maplibre.dart';
 import '../controllers/balance_controller.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -49,13 +50,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Map placeholder (dark background)
+          // Mapa como fondo
           Container(
             height: MediaQuery.of(context).size.height,
-            color: Colors.black87,
             child: Stack(
               children: [
-                // Price Display centrado pero un poco arriba
+                // Mapa como fondo (primer elemento para que esté en el background)
+                Positioned.fill(
+                  child: MapaView(),
+                ),
+
+                // Price Display centrado pero un poco arriba (segundo elemento para que esté sobre el mapa)
                 Positioned(
                   top: 70,
                   left: 0,
@@ -72,11 +77,11 @@ class _MyHomePageState extends State<MyHomePage> {
           // DraggableScrollableSheet for Actions section
           DraggableScrollableSheet(
             controller: _sheetController,
-            initialChildSize: 0.45,
-            minChildSize: 0.42,
+            initialChildSize: 0.29,
+            minChildSize: 0.29,
             maxChildSize: 0.9,
             snap: true,
-            snapSizes: const [0.7, 0.9],
+            snapSizes: const [0.30, 0.9],
             builder: (BuildContext context, ScrollController scrollController) {
               // Store the scroll controller for later use
               _listScrollController = scrollController;
@@ -117,42 +122,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
                     // Title
                     Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.only(right: 1, top: 25),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Acciones',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Expanded(
+                            child: TransactionItem(
+                                title: 'Nuevo Viaje',
+                                subtitle: 'Hoy',
+                                amount: -7.5,
+                                icon: Icons.directions_bus,
+                                isClickable: true),
                           ),
-                          SizedBox(width: 10),
-                          AddCash(),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 15.0),
+                            child: AddCash(),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 10),
-                    TransactionItem(
-                        title: 'Nuevo Viaje',
-                        subtitle: 'Hoy',
-                        amount: -7.5,
-                        icon: Icons.directions_bus,
-                        isClickable: true),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: Colors.grey.shade800,
-                        thickness: 2,
-                      ),
+
+                    Divider(
+                      color: Colors.grey.shade800,
+                      thickness: 2,
                     ),
 
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 5),
+                          horizontal: 20, vertical: 0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -179,9 +178,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 10),
-
-                    const SizedBox(height: 10),
                     // Transaction list - dynamically updated
                     Obx(() => balanceController.transactions.isEmpty
                         ? Center(
@@ -284,6 +280,7 @@ class PriceDisplay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
       decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.inverseSurface,
         border: Border.all(
           color: Theme.of(context).colorScheme.primary,
           width: 1,
