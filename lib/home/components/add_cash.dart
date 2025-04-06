@@ -28,7 +28,7 @@ class AddCash extends StatelessWidget {
             : null,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: EdgeInsets.all(15),
+          padding: EdgeInsets.all(17),
           decoration: BoxDecoration(
             color: Colors.grey.shade800,
             borderRadius: BorderRadius.circular(8),
@@ -39,8 +39,8 @@ class AddCash extends StatelessWidget {
           ),
           child: Icon(
             Icons.add,
-            color: Theme.of(context).colorScheme.primaryContainer,
-            size: 24,
+            color: Colors.greenAccent,
+            size: 32,
           ),
         ),
       ),

@@ -20,6 +20,30 @@ class TransactionItem extends StatelessWidget {
     this.isClickable = false,
   });
 
+  void _showconfirmationAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.grey.shade800,
+          title: Text('Se actualizó el balance',
+              style: TextStyle(color: Colors.white)),
+          content: const Text(
+            'Nuevo Viaje -7.5',
+            style: TextStyle(fontSize: 18, color: Colors.white),
+          ),
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'))
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final BalanceController balanceController = Get.find<BalanceController>();
@@ -65,7 +89,15 @@ class TransactionItem extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: isClickable
-                    ? () => balanceController.reduceBalance()
+                    ? () {
+                        // Show modal if balance was sufficient
+                        double currentBalance = balanceController.balance.value;
+                        if (currentBalance >= 7.5) {
+                          _showconfirmationAlert(context);
+                        }
+                        // Check balance before reducing
+                        balanceController.reduceBalance();
+                      }
                     : null,
                 child: Padding(
                   padding:

@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ruta_app/edit_cash_screen/edit_screen.dart';
 import 'package:ruta_app/home/components/add_cash.dart';
-import 'package:ruta_app/home/components/app_bar.dart';
 import 'package:ruta_app/home/components/mapa.dart';
 import 'package:ruta_app/home/components/transaction_items.dart';
-import 'package:maplibre/maplibre.dart';
 import '../controllers/balance_controller.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -25,6 +23,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final RxBool _showBackToTopButton = false.obs;
   // Store the scroll controller as a class variable
   ScrollController? _listScrollController;
+  // Reference to the MapaView
+  MapaView? _mapaView;
 
   String _getTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
@@ -57,7 +57,10 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 // Mapa como fondo (primer elemento para que esté en el background)
                 Positioned.fill(
-                  child: MapaView(),
+                  child: Builder(builder: (context) {
+                    _mapaView = const MapaView();
+                    return _mapaView!;
+                  }),
                 ),
 
                 // Price Display centrado pero un poco arriba (segundo elemento para que esté sobre el mapa)
@@ -70,7 +73,87 @@ class _MyHomePageState extends State<MyHomePage> {
                         PriceDisplay(amount: balanceController.balance.value)),
                   ),
                 ),
+
+                Positioned(
+                    top: 150,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.inverseSurface,
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 10.0),
+                          child: Obx(() {
+                            final availableTrips =
+                                (balanceController.balance.value / 7.5).floor();
+                            final tripText = availableTrips == 1
+                                ? "Viaje disponible"
+                                : "Viajes disponibles";
+                            final color = availableTrips > 0
+                                ? Colors.green
+                                : Colors.orange;
+
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.directions_car,
+                                    color: color, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "$availableTrips ",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text("$tripText",
+                                    style: TextStyle(
+                                      color: const Color.fromARGB(
+                                          255, 192, 192, 192),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    )),
+                                if (availableTrips == 0) ...[
+                                  const SizedBox(width: 8),
+                                  Tooltip(
+                                    message: "Necesitas recargar tu saldo",
+                                    child: Icon(Icons.info_outline,
+                                        color: Colors.orange, size: 18),
+                                  )
+                                ]
+                              ],
+                            );
+                          }),
+                        ),
+                      ),
+                    ))
               ],
+            ),
+          ),
+
+          // Location button
+          Positioned(
+            right: 16,
+            bottom: MediaQuery.of(context).size.height *
+                0.31, // Just above the sheet
+            child: FloatingActionButton(
+              heroTag: 'locationButton',
+              backgroundColor: const Color(0xFF03788D),
+              mini: true,
+              onPressed: () {
+                // Usar el controlador para centrar el mapa en la ubicación actual
+                MapaController().goToCurrentLocation();
+              },
+              child: const Icon(Icons.my_location, color: Colors.white),
             ),
           ),
 
@@ -122,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                     // Title
                     Padding(
-                      padding: EdgeInsets.only(right: 1, top: 25),
+                      padding: EdgeInsets.only(right: 5, left: 5, top: 15),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -136,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           Padding(
                             padding:
-                                const EdgeInsets.symmetric(horizontal: 15.0),
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             child: AddCash(),
                           ),
                         ],
@@ -264,7 +347,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // Bottom action buttons
         ],
       ),
-      bottomNavigationBar: const BottomActionButtons(),
+      // bottomNavigationBar: const BottomActionButtons(currentPage: NavigationPage.home),
     );
   }
 }
