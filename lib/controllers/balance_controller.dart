@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ruta_app/transfer_screen/components/custom_dialog.dart';
@@ -44,8 +43,9 @@ class BalanceController extends GetxController {
   void loadTransactions() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      List<String> savedTransactions = prefs.getStringList(transactionsKey) ?? [];
-      
+      List<String> savedTransactions =
+          prefs.getStringList(transactionsKey) ?? [];
+
       transactions.value = savedTransactions.map((transaction) {
         return jsonDecode(transaction) as Map<String, dynamic>;
       }).toList();
@@ -110,7 +110,7 @@ class BalanceController extends GetxController {
 
     // Save updated list
     await prefs.setStringList(transactionsKey, savedTransactions);
-    
+
     // Update observable list
     transactions.add(transaction);
   }

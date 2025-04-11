@@ -8,26 +8,27 @@ class MapaController {
   static final MapaController _instance = MapaController._internal();
   factory MapaController() => _instance;
   MapaController._internal();
-  
+
   _MapaViewState? _state;
-  
+
   void registerState(_MapaViewState state) {
     _state = state;
   }
-  
+
   void goToCurrentLocation() {
     _state?._goToCurrentLocation();
   }
 }
 
 class MapaView extends StatefulWidget {
-  const MapaView({Key? key}) : super(key: key);
-  
+  const MapaView({super.key});
+
   @override
   State<MapaView> createState() => _MapaViewState();
 }
 
-class _MapaViewState extends State<MapaView> with AutomaticKeepAliveClientMixin {
+class _MapaViewState extends State<MapaView>
+    with AutomaticKeepAliveClientMixin {
   // Registrar el estado con el controlador
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _MapaViewState extends State<MapaView> with AutomaticKeepAliveClientMixin 
     // Ejecutar la obtención de posición con un pequeño retraso para permitir que la UI se renderice primero
     Future.delayed(Duration.zero, _determinePosition);
   }
-  
+
   @override
   bool get wantKeepAlive => true;
   bool _gesturesEnabled = true;
@@ -48,8 +49,6 @@ class _MapaViewState extends State<MapaView> with AutomaticKeepAliveClientMixin 
   double? _userLongitude;
   final List<Point> _userLocationPoints = [];
   StreamSubscription<geo.Position>? _positionStreamSubscription;
-
-
 
   // Método para obtener la posición actual del usuario
   Future<void> _determinePosition() async {
@@ -67,8 +66,9 @@ class _MapaViewState extends State<MapaView> with AutomaticKeepAliveClientMixin 
         permission = await geo.Geolocator.requestPermission();
         if (permission == geo.LocationPermission.denied) {
           // Permisos denegados
-          if (!mounted)
+          if (!mounted) {
             return; // Verificar nuevamente si el widget sigue montado
+          }
           setState(() {
             _isLoading = false;
           });
@@ -167,7 +167,7 @@ class _MapaViewState extends State<MapaView> with AutomaticKeepAliveClientMixin 
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
-    
+
     // Posición inicial del mapa (por defecto si no hay ubicación del usuario)
     final Position initialPosition = Position(9.17, 47.68);
 
@@ -199,10 +199,11 @@ class _MapaViewState extends State<MapaView> with AutomaticKeepAliveClientMixin 
                 if (_userLocationPoints.isNotEmpty)
                   CircleLayer(
                     points: _userLocationPoints,
-                    color: const Color(0xFF03788D)
-                        .withOpacity(0.2), // Color azul muy transparente para el sombreado
+                    color: const Color(0xFF03788D).withOpacity(
+                        0.2), // Color azul muy transparente para el sombreado
                     radius: 30, // Radio grande para el sombreado de precisión
-                    strokeColor: Colors.transparent, // Sin borde para el sombreado
+                    strokeColor:
+                        Colors.transparent, // Sin borde para el sombreado
                     strokeWidth: 0,
                   ),
                 // Agregar el CircleLayer para mostrar la ubicación exacta del usuario

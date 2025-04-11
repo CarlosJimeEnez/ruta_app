@@ -12,7 +12,7 @@ class VehicleListItem extends StatelessWidget {
   final Color titleColor;
 
   const VehicleListItem({
-    Key? key,
+    super.key,
     this.icon = Icons.directions_bus, // Icono por defecto
     required this.title,
     required this.status,
@@ -23,7 +23,7 @@ class VehicleListItem extends StatelessWidget {
     this.dateColor = Colors.grey, // Color gris para la fecha
     this.titleColor = const Color.fromARGB(
         221, 252, 252, 252), // Color casi negro para el título
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

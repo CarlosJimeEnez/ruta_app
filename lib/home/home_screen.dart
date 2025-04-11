@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ruta_app/edit_cash_screen/edit_screen.dart';
 import 'package:ruta_app/home/components/add_cash.dart';
 import 'package:ruta_app/home/components/mapa.dart';
+import 'package:ruta_app/home/components/native_ad_widget.dart';
 import 'package:ruta_app/home/components/transaction_items.dart';
 import '../controllers/balance_controller.dart';
 
@@ -51,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: [
           // Mapa como fondo
-          Container(
+          SizedBox(
             height: MediaQuery.of(context).size.height,
             child: Stack(
               children: [
@@ -115,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text("$tripText",
+                                Text(tripText,
                                     style: TextStyle(
                                       color: const Color.fromARGB(
                                           255, 192, 192, 192),
@@ -278,7 +279,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         : ListView.builder(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
-                            itemCount: balanceController.transactions.length,
+                            itemCount:
+                                balanceController.transactions.length > 10
+                                    ? 10
+                                    : balanceController.transactions.length,
                             itemBuilder: (context, index) {
                               // Get transaction data in reverse order (newest first)
                               final transaction =
@@ -347,7 +351,15 @@ class _MyHomePageState extends State<MyHomePage> {
           // Bottom action buttons
         ],
       ),
-      // bottomNavigationBar: const BottomActionButtons(currentPage: NavigationPage.home),
+      // bottomNavigationBar: Container(
+      //   margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      //   child: const NativeAdWidget(
+      //     // ID de anuncio de prueba para desarrollo
+      //     adUnitId: 'ca-app-pub-3940256099942544/2247696110', // ID de prueba de Google
+      //     // adUnitId: 'ca-app-pub-3235762407291714/4040095009', // Tu ID real (comentado para pruebas)
+      //     height: 100.0, // Altura personalizada más pequeña
+      //   ),
+      // ),
     );
   }
 }
@@ -380,7 +392,7 @@ class PriceDisplay extends StatelessWidget {
             size: 35,
           ),
           Text(
-            '${amount.toStringAsFixed(2)}',
+            amount.toStringAsFixed(2),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 32,

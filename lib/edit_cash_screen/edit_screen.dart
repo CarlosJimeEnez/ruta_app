@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ruta_app/transfer_screen/components/error_dialog.dart';
 import '../controllers/balance_controller.dart';
 import 'package:get/get.dart';
