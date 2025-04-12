@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ruta_app/edit_cash_screen/edit_screen.dart';
@@ -278,7 +279,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         : ListView.builder(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
-                            itemCount: balanceController.transactions.length,
+                            itemCount:
+                                min(balanceController.transactions.length, 15),
                             itemBuilder: (context, index) {
                               // Get transaction data in reverse order (newest first)
                               final transaction =
