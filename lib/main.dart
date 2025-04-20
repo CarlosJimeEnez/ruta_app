@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ruta_app/controllers/balance_controller.dart';
 import 'package:ruta_app/home/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Inicializar el SDK de Google Mobile Ads
+  await MobileAds.instance.initialize();
   Get.put(BalanceController());
   runApp(const MyApp());
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ruta_app/edit_cash_screen/edit_screen.dart';
 import 'package:ruta_app/home/components/add_cash.dart';
 import 'package:ruta_app/home/components/mapa.dart';
@@ -17,6 +18,45 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // Banner de AdMob
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBannerAd();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
+  void _loadBannerAd() {
+    // ID de prueba para banner de AdMob
+    final adUnitId = 'ca-app-pub-3940256099942544/6300978111'; // ID de prueba oficial de Google
+
+    _bannerAd = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          print('Error al cargar el anuncio: ${error.message}');
+        },
+      ),
+    );
+
+    _bannerAd?.load();
+  }
   // Use GetX controller instead of local state
   final BalanceController balanceController = Get.put(BalanceController());
   final DraggableScrollableController _sheetController =
@@ -364,6 +404,13 @@ class _MyHomePageState extends State<MyHomePage> {
           // Bottom action buttons
         ],
       ),
+      bottomNavigationBar: _isAdLoaded
+          ? SizedBox(
+              height: _bannerAd!.size.height.toDouble(),
+              width: _bannerAd!.size.width.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            )
+          : null,
       // bottomNavigationBar: const BottomActionButtons(currentPage: NavigationPage.home),
     );
   }
