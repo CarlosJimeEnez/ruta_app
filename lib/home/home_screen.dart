@@ -171,10 +171,13 @@ class _MyHomePageState extends State<MyHomePage> {
               _listScrollController = scrollController;
               // Add listener to the scroll controller
               scrollController.addListener(() {
-                if (scrollController.offset >= 300 &&
+                // Check if scrolled to the bottom
+                if (scrollController.position.pixels >=
+                        scrollController.position.maxScrollExtent - 50 &&
                     !_showBackToTopButton.value) {
                   _showBackToTopButton.value = true;
-                } else if (scrollController.offset < 300 &&
+                } else if (scrollController.position.pixels <
+                        scrollController.position.maxScrollExtent - 50 &&
                     _showBackToTopButton.value) {
                   _showBackToTopButton.value = false;
                 }
@@ -280,7 +283,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
                             itemCount:
-                                min(balanceController.transactions.length, 15),
+                                min(balanceController.transactions.length, 8),
                             itemBuilder: (context, index) {
                               // Get transaction data in reverse order (newest first)
                               final transaction =
@@ -330,12 +333,24 @@ class _MyHomePageState extends State<MyHomePage> {
                           backgroundColor:
                               Theme.of(context).colorScheme.primary,
                           onPressed: () {
-                            // Use the stored scroll controller
-                            _listScrollController?.animateTo(
-                              0,
+                            // First collapse the draggable sheet
+                            _sheetController
+                                .animateTo(
+                              0.29, // The minChildSize value
                               duration: const Duration(milliseconds: 500),
                               curve: Curves.easeInOut,
-                            );
+                            )
+                                .then((_) {
+                              // After the sheet is collapsed, reset the internal scroll position with animation
+                              // This ensures the content is fully reset to its initial state with a smooth transition
+                              if (_listScrollController != null) {
+                                _listScrollController!.animateTo(
+                                  0,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                );
+                              }
+                            });
                           },
                           child: const Icon(
                             Icons.arrow_upward,

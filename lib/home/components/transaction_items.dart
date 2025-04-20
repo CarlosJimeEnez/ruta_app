@@ -25,12 +25,26 @@ class TransactionItem extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.grey.shade800,
+          backgroundColor: const Color.fromARGB(255, 27, 27, 27),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: const BorderSide(
+                color: Color.fromARGB(255, 85, 125, 151), width: 1),
+          ),
           title: Text('Se actualizó el balance',
-              style: TextStyle(color: Colors.white)),
-          content: const Text(
-            'Nuevo Viaje -7.5',
-            style: TextStyle(fontSize: 18, color: Colors.white),
+              style: const TextStyle(color: Colors.white)),
+          content: Row(
+            children: [
+              const Text(
+                'Nuevo Viaje:',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+              const Text(" -7.5",
+                  style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold))
+            ],
           ),
           actions: [
             ElevatedButton(
